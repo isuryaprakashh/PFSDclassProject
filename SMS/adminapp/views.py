@@ -257,3 +257,7 @@ def add_student(request):
     else:
         form = StudentForm()
     return render(request, 'adminapp/add_student.html', {'form': form})
+
+def student_list(request):
+    students = StudentList.objects.all()
+    return render(request, 'adminapp/student_list.html', {'students': students})

@@ -26,4 +26,5 @@ urlpatterns = [
     path('datetime_view/',views.datetime_view,name='datetime_view'),
 
     path('add_student/',views.add_student,name='add_student'),
+    path('student_list',views.student_list,name='student_list'),
 ]
