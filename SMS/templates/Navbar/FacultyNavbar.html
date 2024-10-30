@@ -28,7 +28,17 @@
           <a class="nav-link" href="#">Features</a>
         </li>
            <li class="nav-item">
-          <a class="nav-link" href="{% url 'add_student' %}">Add student</a>
+          <a class="nav-link" href="{% url 'facultyapp:add_blog' %} ">Blog</a>
+        </li>
+          <li class="nav-item">
+          <a class="nav-link" href="{% url 'facultyapp:add_course' %}">Add course</a>
+        </li>
+          <li class="nav-item">
+          <a class="nav-link" href="{% url 'facultyapp:view_student_list' %}">View Student List</a>
+        </li>
+          </li>
+          <li class="nav-item">
+          <a class="nav-link" href="{% url 'facultyapp:post_marks' %}">Post Marks</a>
         </li>
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">

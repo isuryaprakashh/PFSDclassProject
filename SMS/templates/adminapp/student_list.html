@@ -4,6 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <title>Printer</title>
+    <!-- Add Bootstrap CSS -->
+    <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
 </head>
 <body>
 {% block body %}
@@ -14,17 +16,21 @@
       First in DOM, no order applied
         <br><br>
             <h2>Student List</h2>
-<table>
-    <tr>
-        <th>Register Number</th>
-        <th>Name</th>
-    </tr>
-    {% for student in students %}
-    <tr>
-        <td>{{ student.Register_Number }}</td>
-        <td>{{ student.Name }}</td>
-    </tr>
-    {% endfor %}
+<table class="table table-bordered table-hover table-striped">
+    <thead class="table-dark">
+        <tr>
+            <th>Register Number</th>
+            <th>Name</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for student in students %}
+        <tr>
+            <td>{{ student.Register_Number }}</td>
+            <td>{{ student.Name }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
 </table>
     </div>
       <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>

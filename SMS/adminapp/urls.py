@@ -26,5 +26,13 @@ urlpatterns = [
     path('datetime_view/',views.datetime_view,name='datetime_view'),
 
     path('add_student/',views.add_student,name='add_student'),
-    path('student_list',views.student_list,name='student_list'),
+    path('student_list/',views.student_list,name='student_list'),
+    path('upload_file/',views.upload_file,name='upload_file'),
+
+    path('feedback/', views.submit_feedback, name='submit_feedback'),
+    path('feedback/success/', views.feedback_success, name='feedback_success'),  # Define this view for success page
+    path('contact_list/', views.contact_list, name='contact_list'),
+    path('add/', views.contact_add, name='contact_add'),
+    path('delete/<int:pk>/', views.contact_delete, name='contact_delete'),
+
 ]

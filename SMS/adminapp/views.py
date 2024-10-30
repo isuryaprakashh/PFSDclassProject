@@ -1,46 +1,57 @@
+import matplotlib
 from django.shortcuts import render
+
 
 # Create your views here.
 def projecthomepage(request):
-    return render(request,'adminapp/ProjectHomePage.html')
+    return render(request, 'adminapp/ProjectHomePage.html')
+
 
 def printpagecall(request):
-    return render(request,'adminapp/printer.html')
+    return render(request, 'adminapp/printer.html')
+
 
 def printpagelogic(request):
     if request.method == 'POST':
         user_input = request.POST['user_input']
         print(f'User Input: {user_input}')
-    a1={'user_input':user_input}
-    return render(request,'adminapp/printer.html',a1)
+    a1 = {'user_input': user_input}
+    return render(request, 'adminapp/printer.html', a1)
+
 
 def exceptionpagecall(request):
-    return render(request,'adminapp/ExceptionExample.html')
+    return render(request, 'adminapp/ExceptionExample.html')
+
+
 def exceptionpagelogic(request):
     if request.method == "POST":
         user_input = request.POST['user_input']
-        result=None
-        error_message=None
+        result = None
+        error_message = None
         try:
-            num=int(user_input)
-            result=10/num
+            num = int(user_input)
+            result = 10 / num
         except Exception as e:
-            error_message=str(e)
-        return render(request,'adminapp/ExceptionExample.html',{'result':result,'error':error_message})
-    return render(request,'adminapp/ExceptionExample.html')
+            error_message = str(e)
+        return render(request, 'adminapp/ExceptionExample.html', {'result': result, 'error': error_message})
+    return render(request, 'adminapp/ExceptionExample.html')
+
 
 import random
 import string
 
+
 def randompagecall(request):
-    return render(request,'adminapp/RandomExample.html')
+    return render(request, 'adminapp/RandomExample.html')
+
 
 def randomlogic(request):
     if request.method == "POST":
         number1 = int(request.POST['number1'])
-        ran = ''.join(random.sample(string.ascii_uppercase+string.digits, k=number1))
-    a1= {'ran':ran}
-    return render(request,'adminapp/RandomExample.html',a1)
+        ran = ''.join(random.sample(string.ascii_uppercase + string.digits, k=number1))
+    a1 = {'ran': ran}
+    return render(request, 'adminapp/RandomExample.html', a1)
+
 
 def calculatorlogic(request):
     result = None
@@ -60,9 +71,12 @@ def calculatorlogic(request):
 
     return render(request, 'adminapp/calculator.html', {'result': result})
 
-from django.shortcuts import render,redirect,get_object_or_404
+
+from django.shortcuts import render, redirect, get_object_or_404
 from .models import Task
 from .forms import TaskForm
+
+
 def add_task(request):
     if request.method == 'POST':
         form = TaskForm(request.POST)
@@ -73,13 +87,13 @@ def add_task(request):
     else:
         form = TaskForm()
     tasks = Task.objects.all()
-    return render(request, 'adminapp/add_task.html', {'form': form,'tasks':tasks})
+    return render(request, 'adminapp/add_task.html', {'form': form, 'tasks': tasks})
+
 
 def delete_task(request, pk):
     task = get_object_or_404(Task, pk=pk)
     task.delete()
     return redirect('add_task')
-
 
 
 # from django.shortcuts import render, redirect, get_object_or_404
@@ -140,8 +154,12 @@ def delete_task(request, pk):
 from django.contrib import messages
 from django.contrib.auth.models import User, auth
 from django.shortcuts import render
+
+
 def UserRegisterPageCall(request):
     return render(request, 'adminapp/register.html')
+
+
 def UserRegisterLogic(request):
     if request.method == 'POST':
         username = request.POST['username']
@@ -175,15 +193,20 @@ def UserRegisterLogic(request):
     else:
         return render(request, 'adminapp/register.html')
 
+
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth import authenticate, login
 
+
 def UserLoginPageCall(request):
     return render(request, 'adminapp/login.html')
+
+
 from django.contrib import messages
 from django.contrib.auth import authenticate, login
 from django.shortcuts import render, redirect
+
 
 def UserLoginLogic(request):
     if request.method == 'POST':
@@ -225,6 +248,7 @@ from django.shortcuts import render
 from datetime import datetime
 import pytz
 
+
 def datetime_view(request):
     current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     selected_country = request.GET.get('country', 'UTC')
@@ -248,11 +272,33 @@ def datetime_view(request):
 from .forms import StudentForm
 from .models import StudentList
 
+
+# def add_student(request):
+#     if request.method == 'POST':
+#         form = StudentForm(request.POST)
+#         if form.is_valid():
+#             form.save()
+#             return redirect('student_list')
+#     else:
+#         form = StudentForm()
+#     return render(request, 'adminapp/add_student.html', {'form': form})
+from django.contrib.auth.models import User
+from .models import StudentList
+from .forms import StudentForm
+from django.shortcuts import redirect, render
 def add_student(request):
     if request.method == 'POST':
         form = StudentForm(request.POST)
         if form.is_valid():
-            form.save()
+            student = form.save(commit=False)
+            register_number = form.cleaned_data['Register_Number']
+            try:
+                user = User.objects.get(username=register_number)
+                student.user = user  # Assign the matching User to the student
+            except User.DoesNotExist:
+                form.add_error('Register_Number', 'No user found with this Register Number')
+                return render(request, 'adminapp/add_student.html', {'form': form})
+            student.save()
             return redirect('student_list')
     else:
         form = StudentForm()
@@ -261,3 +307,116 @@ def add_student(request):
 def student_list(request):
     students = StudentList.objects.all()
     return render(request, 'adminapp/student_list.html', {'students': students})
+
+
+#  ============== CSV TASK ===============
+
+import pandas as pd
+import matplotlib.pyplot as plt
+import base64
+from io import BytesIO
+from django.shortcuts import render
+matplotlib.use('Agg')
+
+
+def upload_file(request):
+    if request.method == 'POST' and request.FILES['file']:
+        file = request.FILES['file']
+        # Read the CSV file
+        df = pd.read_csv(file, parse_dates=['Date'], dayfirst=True)
+
+        # Calculate total and average sales
+        total_sales = df['Sales'].sum()
+        average_sales = df['Sales'].mean()
+
+        # Add a 'Month' column and calculate monthly sales
+        df['Month'] = df['Date'].dt.month
+        monthly_sales = df.groupby('Month')['Sales'].sum()
+
+        # Month names for labels
+        month_names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+        monthly_sales.index = monthly_sales.index.map(lambda x: month_names[x - 1])
+
+        # Plot the pie chart
+        plt.figure(figsize=(6, 6))
+        plt.pie(monthly_sales, labels=monthly_sales.index, autopct='%1.1f%%', startangle=90)
+        plt.title('Sales Distribution Per Month')
+
+        # Save the plot to a buffer
+        buffer = BytesIO()
+        plt.savefig(buffer, format='png')
+        buffer.seek(0)
+
+        # Convert to base64 to send to the template
+        image_data = base64.b64encode(buffer.getvalue()).decode('utf-8')
+        plt.close()
+
+        # Pass data to the template
+        context = {
+            'total_sales': total_sales,
+            'average_sales': average_sales,
+            'monthly_sales': monthly_sales.to_dict(),
+            'chart': image_data,
+        }
+        return render(request, 'adminapp/chart.html', context)
+
+    return render(request, 'adminapp/chart.html')
+
+
+
+from django.shortcuts import render, redirect
+from django.views.decorators.csrf import csrf_protect
+from .models import Feedback
+
+@csrf_protect
+def submit_feedback(request):
+    if request.method == 'POST':
+        name = request.POST['name']
+        email = request.POST['email']
+        phone = request.POST['phone']
+        description = request.POST['description']
+
+        feedback = Feedback(name=name, email=email, phone=phone, description=description)
+        feedback.save()
+
+        return redirect('feedback_success')  # Redirect to a success page or another view
+    return render(request, 'adminapp/feedback.html')
+
+def feedback_success(request):
+    return render(request, 'adminapp/feedback_success.html')
+
+from django.shortcuts import render, redirect, get_object_or_404
+from .models import Contact
+from .forms import ContactForm
+from django.core.mail import send_mail
+from django.conf import settings
+
+def contact_list(request):
+    query = request.GET.get('q')
+    contacts = Contact.objects.all()
+    if query:
+        contacts = contacts.filter(name__icontains=query) | contacts.filter(email__icontains=query)
+    return render(request, 'adminapp/contact_list.html', {'contacts': contacts})
+
+def contact_add(request):
+    if request.method == 'POST':
+        form = ContactForm(request.POST)
+        if form.is_valid():
+            contact = form.save()
+            # Send email
+            send_mail(
+                'New Contact Added',
+                f'Contact Details:\nName: {contact.name}\nEmail: {contact.email}\nPhone: {contact.phone_number}\nAddress: {contact.address}',
+                settings.DEFAULT_FROM_EMAIL,
+                [request.POST.get('email_address')],  # Assuming you have an email field in your form
+            )
+            return redirect('contact_list')
+    else:
+        form = ContactForm()
+    return render(request, 'adminapp/contact_form.html', {'form': form})
+
+def contact_delete(request, pk):
+    contact = get_object_or_404(Contact, pk=pk)
+    contact.delete()
+    return redirect('contact_list')
+
